@@ -1,0 +1,8 @@
+torch
+torchvision
+streamlit
+numpy
+Pillow
+albumentations
+tqdm
+huggingface_hub
