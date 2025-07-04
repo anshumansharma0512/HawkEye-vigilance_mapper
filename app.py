@@ -50,11 +50,11 @@ uploaded_file = st.file_uploader("Upload a Surveillance Image", type=["jpg", "pn
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
-    st.image(image, caption="Uploaded Surveillance Image", use_column_width=True)
+    st.image(image, caption="Uploaded Surveillance Image", use_container_width=True)
 
     result = generate_map(image)
     if result is not None:
-        st.image(result, caption="Generated Map", use_column_width=True)
+        st.image(result, caption="Generated Map", use_container_width=True)
 
 st.markdown("---")
 st.header("Or Try a Sample Image")
@@ -69,7 +69,7 @@ for idx, file in enumerate(sample_files):
         img = Image.open(img_path)
         satellite_crop = img.crop((0, 0, img.width // 2, img.height))
         if st.button(f"Sample {idx+1}"):
-            st.image(satellite_crop, caption=f"Sample {idx+1}", use_column_width=True)
+            st.image(satellite_crop, caption=f"Sample {idx+1}", use_container_width=True)
             result = generate_map(satellite_crop)
             if result is not None:
-                st.image(result, caption="Generated Map", use_column_width=True)
+                st.image(result, caption="Generated Map", use_container_width=True)
