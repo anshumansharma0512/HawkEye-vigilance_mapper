@@ -18,6 +18,14 @@ checkpoint = torch.load(model_path, map_location=device)
 gen.load_state_dict(checkpoint["state_dict"])
 gen.eval()
 
+
+def preprocess_sample_image(img):
+    img = Image.fromarray(np.array(img)).resize((256, 256))
+    img = np.array(img).astype(np.float32)
+    img = (img / 127.5) - 1.0  # Normalize to [-1, 1]
+    img = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0).to(device)
+    return img
+
 # Preprocess function
 def preprocess_satellite_image(img):
     img = np.array(img)
@@ -32,16 +40,22 @@ def preprocess_satellite_image(img):
     return img
 
 # Generate map function
-def generate_map(image):
-    input_tensor = preprocess_satellite_image(image)
+def generate_map(image, is_sample=False):
+    if is_sample:
+        input_tensor = preprocess_sample_image(image)
+    else:
+        input_tensor = preprocess_satellite_image(image)
+
     if input_tensor is None:
         return None
+
     with torch.no_grad():
         fake = gen(input_tensor)
         fake = (fake + 1) / 2  # Rescale to [0, 1]
         fake = fake.squeeze().permute(1, 2, 0).cpu().numpy()
         fake = (fake * 255).astype(np.uint8)
     return fake
+
 
 # Streamlit UI
 st.title("HawkEye Vigilance Mapper 🛰️")
@@ -70,6 +84,6 @@ for idx, file in enumerate(sample_files):
         satellite_crop = img.crop((0, 0, img.width // 2, img.height))
         if st.button(f"Sample {idx+1}"):
             st.image(satellite_crop, caption=f"Sample {idx+1}", use_container_width=True)
-            result = generate_map(satellite_crop)
+            result = generate_map(satellite_crop, is_sample=True)
             if result is not None:
                 st.image(result, caption="Generated Map", use_container_width=True)
